@@ -1,0 +1,11 @@
+# Commands that require a target player before the message content.
+user-target-commands:
+  - msg
+  - tell
+  - w
+  - whisper
+  - pm
+  - dm
+  - message
+  - reply
+  - r

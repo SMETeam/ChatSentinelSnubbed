@@ -11,24 +11,11 @@ general:
   sanitize-names: true
 
   # Filter and remove non-latin characters from all messages.
-  filter-other: false
+  filter-other: true
 
   # Commands that will be treated as normal messages
   commands:
-    - /broadcast
-    - /ebroadcast
-    - /bc
-    - /ebc
-    - /tell
-    - /etell
-    - /msg
-    - /emsg
-    - /reply
-    - /ereply
-    - /r
-    - /er
-    - /global
-    - /g
+    - /test
 
 # Checks if the player is using blacklisted words.
 blacklist:
@@ -40,14 +27,14 @@ blacklist:
 
   # Hide the words the player wrote with a ***
   censorship:
-    enabled: false
+    enabled: true
     # Replacement to be used
-    replacement: "***"
+    replacement: " ☹ "
 
   warn:
     # Amount of warns required to execute the commands.
     # Set to -1 to disable this feature completely.
-    max: 3
+    max: 5
 
     # Sends a notification to players with chatsentinel.notify permission.
     # Set to "" to disable this feature completely.
@@ -57,8 +44,8 @@ blacklist:
   # You need a mute plugin for ChatSentinel to mute players. (Recommended: LiteBans/AdvancedBans)
   # Set to [] to disable this feature completely.
   punishments:
-    - "mute -s %player% Offensive Language (%message%) 1d"
-  
+    - "tempmute %player% 5m Automated: Offensive Language"
+
   # if fake_message is false
   # and if censorship is false
   # The message will be cancelled.
@@ -66,13 +53,13 @@ blacklist:
 
 # Checks if messages have too many caps.
 caps:
-  enabled: true
+  enabled: false
 
   # If this is true it will replace the caps with low-case letters.
   replace: true
 
   # Maximum amount of caps allowed.
-  max: 8
+  max: 15
 
   warn:
     # Amount of warns required to execute the commands.
@@ -93,9 +80,9 @@ cooldown:
 
   # Time in milliseconds.
   time:
-    repeat-global: 1000
+    repeat-global: 500
     repeat: 10000
-    normal: 1000
+    normal: 250
     command: 400
 
 # Checks if player is using too many repeated characters.
@@ -116,7 +103,9 @@ flood:
 
     # Sends a notification to players with chatsentinel.notify permission.
     # Set to "" to disable this feature completely.
-    notification: "&c&lCS: &e%player% &ffailed &6Flood &7(&c%message%&7)"
+    notification: ""
+    
+    # "&c&lCS: &e%player% &ffailed &6Flood &7(&c%message%&7)"
 
   # You need a mute plugin for ChatSentinel to mute players. (Recommended: LiteBans/AdvancedBans)
   # Set to [] to disable this feature completely.
@@ -126,7 +115,7 @@ flood:
 # Example: testplugin:testcommand
 syntax:
   # Do you want to enable this module?
-  enabled: true
+  enabled: false
 
   # Syntax commands that will not be checked.
   # Set to {} to disable whitelist.
@@ -145,3 +134,34 @@ syntax:
   # You need a mute plugin for ChatSentinel to mute players. (Recommended: LiteBans/AdvancedBans)
   # Set to [] to disable this feature completely.
   punishments: []
+
+# Discord webhook notifications for blacklist flags.
+# Placeholders: %player%, %original%, %censored%, %detected%
+discord:
+  webhook:
+    enabled: false
+    # Your Discord webhook URL
+    url: ""
+    # Override the webhook username (leave blank for Discord default)
+    username: "Chat Filter"
+    # Optional avatar URL for the webhook
+    avatar_url: ""
+    # Optional plain content message (no embed)
+    content: ""
+    embed:
+      enabled: true
+      title: "Filter Flagged"
+      description: ""
+      # Hex color without # (example: FF5555)
+      color: "FF5555"
+      # Adds timestamp to the embed
+      timestamp: true
+      footer:
+        text: ""
+        icon_url: ""
+      fields:
+        enabled: true
+        player: "Player"
+        detected: "Detected"
+        original: "Original"
+        censored: "Censored"

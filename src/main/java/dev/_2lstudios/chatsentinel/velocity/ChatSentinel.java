@@ -1,5 +1,6 @@
 package dev._2lstudios.chatsentinel.velocity;
 
+import dev._2lstudios.chatsentinel.velocity.listeners.CommandListener;
 import com.google.inject.Inject;
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.command.CommandMeta;
@@ -17,6 +18,9 @@ import dev._2lstudios.chatsentinel.shared.chat.ChatNotificationManager;
 import dev._2lstudios.chatsentinel.shared.chat.ChatPlayer;
 import dev._2lstudios.chatsentinel.shared.chat.ChatPlayerManager;
 import dev._2lstudios.chatsentinel.shared.modules.*;
+import dev._2lstudios.chatsentinel.shared.webhook.DiscordWebhookClient;
+import dev._2lstudios.chatsentinel.shared.webhook.DiscordWebhookMessage;
+import dev._2lstudios.chatsentinel.shared.webhook.DiscordWebhookSettings;
 import dev._2lstudios.chatsentinel.velocity.commands.ChatSentinelCommand;
 import dev._2lstudios.chatsentinel.velocity.listeners.ChatListener;
 import dev._2lstudios.chatsentinel.velocity.listeners.PlayerDisconnectListener;
@@ -71,6 +75,7 @@ public class ChatSentinel {
 		eventManager.register(this, new ChatListener(this));
 		eventManager.register(this, new PlayerDisconnectListener(generalModule, chatPlayerManager, chatNotificationManager));
 		eventManager.register(this, new PostLoginListener(generalModule, chatPlayerManager, chatNotificationManager));
+		eventManager.register(this, new CommandListener(this));
 
 		CommandManager commandManager = server.getCommandManager();
 		CommandMeta commandMeta = commandManager.metaBuilder("chatsentinel")
@@ -134,27 +139,42 @@ public class ChatSentinel {
 	}
 
 	public ChatEventResult processEvent(ChatPlayer chatPlayer, Player player, String originalMessage) {
+		return processEvent(chatPlayer, player, originalMessage, true);
+	}
+
+	public ChatEventResult processCommandEvent(ChatPlayer chatPlayer, Player player, String originalMessage) {
+		return processEvent(chatPlayer, player, originalMessage, false);
+	}
+
+	private ChatEventResult processEvent(ChatPlayer chatPlayer, Player player, String originalMessage, boolean includeCooldown) {
 		ChatEventResult finalResult = new ChatEventResult(originalMessage, false, false);
 		MessagesModule messagesModule = moduleManager.getMessagesModule();
 		String playerName = player.getUsername();
 		String lang = chatPlayer.getLocale();
-		ModerationModule[] moderationModulesToProcess = {
-				moduleManager.getSyntaxModule(),
-				moduleManager.getCapsModule(),
-				moduleManager.getCooldownModule(),
-				moduleManager.getFloodModule(),
-				moduleManager.getBlacklistModule()
-		};
+		ModerationModule[] moderationModulesToProcess = includeCooldown
+				? new ModerationModule[] {
+						moduleManager.getSyntaxModule(),
+						moduleManager.getCapsModule(),
+						moduleManager.getCooldownModule(),
+						moduleManager.getFloodModule(),
+						moduleManager.getBlacklistModule()
+				}
+				: new ModerationModule[] {
+						moduleManager.getSyntaxModule(),
+						moduleManager.getCapsModule(),
+						moduleManager.getFloodModule(),
+						moduleManager.getBlacklistModule()
+				};
 
 		for (ModerationModule moderationModule : moderationModulesToProcess) {
 			// Do not check annormal commands (unless syntax or cooldown)
-			boolean isCommmand = originalMessage.startsWith("/");
-			boolean isNormalCommmand = moduleManager.getGeneralModule()
+			boolean isCommand = originalMessage.startsWith("/");
+			boolean isNormalCommand = moduleManager.getGeneralModule()
 					.isCommand(originalMessage);
 			if (!(moderationModule instanceof SyntaxModerationModule) &&
 					!(moderationModule instanceof CooldownModerationModule) &&
-					isCommmand &&
-					!isNormalCommmand) {
+					isCommand &&
+					!isNormalCommand) {
 				continue;
 			}
 
@@ -189,6 +209,11 @@ public class ChatSentinel {
 				// Send admin notification
 				dispatchNotification(moderationModule, placeholders);
 
+				// Send Discord
+				if (moderationModule instanceof BlacklistModerationModule) {
+					SendDiscord(playerName, originalMessage, result.getMessage(), result.getMatchedWord());
+				}
+
 				// Update message
 				finalResult.setMessage(result.getMessage());
 
@@ -207,6 +232,25 @@ public class ChatSentinel {
 		return finalResult;
 	}
 
+	private void SendDiscord(String playerName, String originalMessage, String censoredMessage,
+			String detectedWord) {
+		DiscordWebhookSettings settings = moduleManager.getDiscordWebhookSettings();
+		if (settings == null || !settings.isEnabled()) {
+			return;
+		}
+
+		DiscordWebhookMessage webhookMessage = new DiscordWebhookMessage(playerName, originalMessage, censoredMessage,
+				detectedWord);
+
+		server.getScheduler().buildTask(this, () -> {
+			try {
+				DiscordWebhookClient.send(settings, webhookMessage);
+			} catch (Exception e) {
+				logger.error("Failed to send Discord webhook.", e);
+			}
+		}).schedule();
+	}
+
 	public ProxyServer getServer() {
 		return server;
 	}
@@ -221,5 +265,9 @@ public class ChatSentinel {
 
 	public ChatPlayerManager getChatPlayerManager() {
 		return chatPlayerManager;
+	}
+
+	public VelocityModuleManager getModuleManager() {
+		return moduleManager;
 	}
 }

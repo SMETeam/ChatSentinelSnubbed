@@ -1,5 +1,7 @@
 package dev._2lstudios.chatsentinel.shared.modules;
 
+import dev._2lstudios.chatsentinel.shared.webhook.DiscordWebhookSettings;
+
 public abstract class ModuleManager {
 	private CapsModerationModule capsModule;
 	private CooldownModerationModule cooldownModule;
@@ -9,6 +11,7 @@ public abstract class ModuleManager {
 	private BlacklistModerationModule blacklistModule;
 	private SyntaxModerationModule syntaxModule;
 	private WhitelistModule whitelistModule;
+	private DiscordWebhookSettings discordWebhookSettings;
 
 	public ModuleManager() {
 		this.capsModule = new CapsModerationModule();
@@ -19,6 +22,7 @@ public abstract class ModuleManager {
 		this.messagesModule = new MessagesModule();
 		this.generalModule = new GeneralModule();
 		this.whitelistModule = new WhitelistModule();
+		this.discordWebhookSettings = null;
 	}
 
 	public CooldownModerationModule getCooldownModule() {
@@ -51,6 +55,14 @@ public abstract class ModuleManager {
 
 	public WhitelistModule getWhitelistModule() {
 		return whitelistModule;
+	}
+
+	public DiscordWebhookSettings getDiscordWebhookSettings() {
+		return discordWebhookSettings;
+	}
+
+	public void setDiscordWebhookSettings(DiscordWebhookSettings discordWebhookSettings) {
+		this.discordWebhookSettings = discordWebhookSettings;
 	}
 
 	public abstract void reloadData();

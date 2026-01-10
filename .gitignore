@@ -8,3 +8,6 @@
 # IDE java settings
 /.classpath
 /.project
+
+# Build file
+build.bat

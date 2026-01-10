@@ -4,11 +4,17 @@ public class ChatEventResult {
     private String message;
     private boolean cancelled;
     private boolean hide;
+    private String matchedWord;
 
     public ChatEventResult(String message, boolean cancelled, boolean hide) {
+        this(message, cancelled, hide, null);
+    }
+
+    public ChatEventResult(String message, boolean cancelled, boolean hide, String matchedWord) {
         this.message = message;
         this.cancelled = cancelled;
         this.hide = hide;
+        this.matchedWord = matchedWord;
     }
 
     public ChatEventResult(String message, boolean cancelled) {
@@ -37,5 +43,13 @@ public class ChatEventResult {
 
     public void setHide(boolean hide) {
         this.hide = hide;
+    }
+
+    public String getMatchedWord() {
+        return matchedWord;
+    }
+
+    public void setMatchedWord(String matchedWord) {
+        this.matchedWord = matchedWord;
     }
 }

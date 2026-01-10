@@ -1,5 +1,7 @@
 package dev._2lstudios.chatsentinel.shared.modules;
 
+import java.util.LinkedHashSet;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import dev._2lstudios.chatsentinel.shared.chat.ChatEventResult;
@@ -68,27 +70,37 @@ public class BlacklistModerationModule extends ModerationModule {
 
 		String sanitizedMessage = message;
 
-		// Filter the arguments of the commands
+		// Remove the command part
 		if (sanitizedMessage.startsWith("/") && message.contains(" ")) {
 			sanitizedMessage = sanitizedMessage.substring(message.indexOf(" "));
 		}
 
-		// Remove weird stuff
+		// Santize it after
 		if (generalModule.isSanitizeEnabled()) {
 			sanitizedMessage = generalModule.sanitize(message);
 		}
 
-		// Remove names
+		// Then if theres a name remove it
 		if (generalModule.isSanitizeNames()) {
 			sanitizedMessage = generalModule.sanitizeNames(message);
 		}
 
-		// Remove whitelisted stuff
+		// Also clear the whitelist matches
 		if (whitelistModule.isEnabled()) {
 			sanitizedMessage = whitelistModule.getPattern().matcher(message).replaceAll("");
 		}
 
-		if (pattern.matcher(sanitizedMessage).find()) {
+		Matcher matcher = pattern.matcher(sanitizedMessage);
+		if (matcher.find()) {
+			LinkedHashSet<String> matches = new LinkedHashSet<>();
+			do {
+				String match = matcher.group();
+				if (match != null && !match.isEmpty()) {
+					matches.add(match);
+				}
+			} while (matcher.find());
+
+			String matchedWord = String.join(", ", matches); // Join all matched words so like SWEAR, SWEAR etc hopefully
 			if (isFakeMessage()) {
 				hide = true;
 			} else if (isCensorshipEnabled()) {
@@ -97,7 +109,9 @@ public class BlacklistModerationModule extends ModerationModule {
 				cancelled = true;
 			}
 
-			return new ChatEventResult(message, cancelled, hide);
+			ChatEventResult result = new ChatEventResult(message, cancelled, hide);
+			result.setMatchedWord(matchedWord);
+			return result;
 		}
 
 		return null;
