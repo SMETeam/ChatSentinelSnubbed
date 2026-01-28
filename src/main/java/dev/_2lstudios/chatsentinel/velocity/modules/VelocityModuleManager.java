@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 public class VelocityModuleManager extends ModuleManager {
 	private final ConfigUtil configUtil;
 	private Set<String> userTargetCommands = new HashSet<>();
+	private Set<String> whitelistedCommands = new HashSet<>();
 
 	public VelocityModuleManager(ConfigUtil configUtil) {
 		this.configUtil = configUtil;
@@ -29,13 +30,15 @@ public class VelocityModuleManager extends ModuleManager {
 		configUtil.create("messages.yml");
 		configUtil.create("blacklist.yml");
 		configUtil.create("whitelist.yml");
-		configUtil.create("commands.yml");
+		configUtil.create("stripped-commands.yml");
+		configUtil.create("whitelisted-commands.yml");
 
 		CommentedConfigurationNode blacklistYml = configUtil.get("blacklist.yml");
 		CommentedConfigurationNode configYml = configUtil.get("config.yml");
 		CommentedConfigurationNode messagesYml = configUtil.get("messages.yml");
 		CommentedConfigurationNode whitelistYml = configUtil.get("whitelist.yml");
-		CommentedConfigurationNode commandsYml = configUtil.get("commands.yml");
+		CommentedConfigurationNode strippedCommandsYml = configUtil.get("stripped-commands.yml");
+		CommentedConfigurationNode whitelistedCommandsYml = configUtil.get("whitelisted-commands.yml");
 		Map<String, Map<String, String>> locales = new HashMap<>();
 
 		for (Object lang : messagesYml.node("langs").childrenMap().keySet()) {
@@ -58,14 +61,25 @@ public class VelocityModuleManager extends ModuleManager {
 				configYml.node("caps", "punishments").childrenList().stream()
 						.map(ConfigurationNode::getString)
 						.toArray(String[]::new));
-		if (commandsYml != null) {
-			userTargetCommands = commandsYml.node("user-target-commands").childrenList().stream()
+		if (strippedCommandsYml != null) {
+			userTargetCommands = strippedCommandsYml.node("user-target-commands").childrenList().stream()
 					.map(ConfigurationNode::getString)
 					.filter(Objects::nonNull)
 					.map(String::toLowerCase)
 					.collect(Collectors.toCollection(HashSet::new));
 		} else {
 			userTargetCommands = new HashSet<>();
+		}
+		if (whitelistedCommandsYml != null) {
+			whitelistedCommands = whitelistedCommandsYml.node("whitelisted-commands").childrenList().stream()
+					.map(ConfigurationNode::getString)
+					.filter(Objects::nonNull)
+					.map(String::trim)
+					.map(String::toLowerCase)
+					.map(command -> command.startsWith("/") ? command.substring(1) : command)
+					.collect(Collectors.toCollection(HashSet::new));
+		} else {
+			whitelistedCommands = new HashSet<>();
 		}
 		getCapsModule().loadData(configYml.node("caps", "enabled").getBoolean(),
 				configYml.node("caps", "replace").getBoolean(),
@@ -154,5 +168,9 @@ public class VelocityModuleManager extends ModuleManager {
 
 	public Set<String> getUserTargetCommands() {
 		return userTargetCommands;
+	}
+
+	public Set<String> getWhitelistedCommands() {
+		return whitelistedCommands;
 	}
 }

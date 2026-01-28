@@ -1,0 +1,13 @@
+# Commands that should be fully ignored by the filter.
+# Use commands without the /
+whitelisted-commands:
+  - report
+  - ban
+  - kick
+  - mute
+  - unmute
+  - tempmute
+  - tempban
+  - ipban
+  - unban
+  - unmute

@@ -42,8 +42,10 @@ public class CommandListener {
             baseCommand = baseCommand.substring(1);
         }
 
-        if (baseCommand.equals("report")) {
-            return; // Ignore /report command entirely so then they can still report censored messages
+        Set<String> whitelistedCommands = moduleManager != null ? moduleManager.getWhitelistedCommands() : Set.of();
+
+        if (whitelistedCommands.contains(baseCommand)) {
+            return; // Ignore whitelisted commands entirely
         }
 
         // No arguments at all
