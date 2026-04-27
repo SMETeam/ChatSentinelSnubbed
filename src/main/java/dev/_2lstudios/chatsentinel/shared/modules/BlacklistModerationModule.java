@@ -104,7 +104,11 @@ public class BlacklistModerationModule extends ModerationModule {
 			if (isFakeMessage()) {
 				hide = true;
 			} else if (isCensorshipEnabled()) {
-				message = pattern.matcher(message).replaceAll(getCensorshipReplacement());
+				String censoredMessage = pattern.matcher(message).replaceAll(getCensorshipReplacement());
+				if (censoredMessage.equals(message)) {
+					return null;
+				}
+				message = censoredMessage;
 			} else if (isBlockRawMessage()) {
 				cancelled = true;
 			}
