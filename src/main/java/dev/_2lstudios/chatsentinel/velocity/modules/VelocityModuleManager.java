@@ -77,17 +77,11 @@ public class VelocityModuleManager extends ModuleManager {
 					.map(String::trim)
 					.map(String::toLowerCase)
 					.map(command -> command.startsWith("/") ? command.substring(1) : command)
+					.filter(command -> !command.isEmpty())
 					.collect(Collectors.toCollection(HashSet::new));
 		} else {
 			whitelistedCommands = new HashSet<>();
 		}
-		getCapsModule().loadData(configYml.node("caps", "enabled").getBoolean(),
-				configYml.node("caps", "replace").getBoolean(),
-				configYml.node("caps", "max").getInt(), configYml.node("caps", "warn", "max").getInt(),
-				configYml.node("caps", "warn", "notification").getString(),
-				configYml.node("caps", "punishments").childrenList().stream()
-						.map(ConfigurationNode::getString)
-						.toArray(String[]::new));
 		getCooldownModule().loadData(configYml.node("cooldown", "enabled").getBoolean(),
 				configYml.node("cooldown", "time", "repeat-global").getInt(),
 				configYml.node("cooldown", "time", "repeat").getInt(),

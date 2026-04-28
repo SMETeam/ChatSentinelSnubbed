@@ -33,14 +33,14 @@ public class CommandListener {
             return;
         }
 
-        String command = event.getCommand();
-        String[] parts = command.split(" ");
-
-        String baseCommand = parts[0].toLowerCase();
-
-        if (baseCommand.startsWith("/")) {
-            baseCommand = baseCommand.substring(1);
+        String command = event.getCommand().trim();
+        if (command.isEmpty()) {
+            return;
         }
+
+        String[] parts = command.split("\\s+");
+
+        String baseCommand = normalizeCommandName(parts[0]);
 
         Set<String> whitelistedCommands = moduleManager != null ? moduleManager.getWhitelistedCommands() : Set.of();
 
@@ -86,5 +86,15 @@ public class CommandListener {
             sb.append(parts[i]);
         }
         return sb.toString();
+    }
+
+    private static String normalizeCommandName(String command) {
+        String normalized = command.toLowerCase();
+
+        while (normalized.startsWith("/")) {
+            normalized = normalized.substring(1);
+        }
+
+        return normalized;
     }
 }
