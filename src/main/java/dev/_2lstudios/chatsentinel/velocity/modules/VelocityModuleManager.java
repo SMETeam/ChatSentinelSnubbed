@@ -28,11 +28,13 @@ public class VelocityModuleManager extends ModuleManager {
 	public void reloadData() {
 		configUtil.create("config.yml");
 		configUtil.create("messages.yml");
+		configUtil.create("blacklist-auto.yml");
 		configUtil.create("blacklist.yml");
 		configUtil.create("whitelist.yml");
 		configUtil.create("stripped-commands.yml");
 		configUtil.create("whitelisted-commands.yml");
 
+		CommentedConfigurationNode autoBlacklistYml = configUtil.get("blacklist-auto.yml");
 		CommentedConfigurationNode blacklistYml = configUtil.get("blacklist.yml");
 		CommentedConfigurationNode configYml = configUtil.get("config.yml");
 		CommentedConfigurationNode messagesYml = configUtil.get("messages.yml");
@@ -103,6 +105,14 @@ public class VelocityModuleManager extends ModuleManager {
 						.collect(Collectors.toList()));
 		getWhitelistModule().loadData(configYml.node("whitelist", "enabled").getBoolean(),
 				whitelistYml.node("expressions").childrenList().stream()
+						.map(ConfigurationNode::getString)
+						.toArray(String[]::new));
+		getAutoBlacklistModule().loadData(autoBlacklistYml.node("enabled").getBoolean(true),
+				autoBlacklistYml.node("reason").getString("Automated ban! Offensive World Detected."),
+				autoBlacklistYml.node("punishments").childrenList().stream()
+						.map(ConfigurationNode::getString)
+						.toArray(String[]::new),
+				autoBlacklistYml.node("expressions").childrenList().stream()
 						.map(ConfigurationNode::getString)
 						.toArray(String[]::new));
 		boolean censorshipEnabled = configYml.node("blacklist", "censorship", "enabled").getBoolean(false);

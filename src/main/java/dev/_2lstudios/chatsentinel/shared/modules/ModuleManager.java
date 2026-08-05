@@ -8,6 +8,7 @@ public abstract class ModuleManager {
 	private FloodModerationModule floodModule;
 	private MessagesModule messagesModule;
 	private GeneralModule generalModule;
+	private AutoBlacklistModerationModule autoBlacklistModule;
 	private BlacklistModerationModule blacklistModule;
 	private SyntaxModerationModule syntaxModule;
 	private WhitelistModule whitelistModule;
@@ -17,6 +18,7 @@ public abstract class ModuleManager {
 		this.capsModule = new CapsModerationModule();
 		this.cooldownModule = new CooldownModerationModule();
 		this.floodModule = new FloodModerationModule();
+		this.autoBlacklistModule = new AutoBlacklistModerationModule(this);
 		this.blacklistModule = new BlacklistModerationModule(this);
 		this.syntaxModule = new SyntaxModerationModule();
 		this.messagesModule = new MessagesModule();
@@ -35,6 +37,10 @@ public abstract class ModuleManager {
 
 	public FloodModerationModule getFloodModule() {
 		return floodModule;
+	}
+
+	public AutoBlacklistModerationModule getAutoBlacklistModule() {
+		return autoBlacklistModule;
 	}
 
 	public BlacklistModerationModule getBlacklistModule() {

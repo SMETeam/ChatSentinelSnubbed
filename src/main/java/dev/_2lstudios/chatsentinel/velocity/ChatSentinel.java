@@ -118,15 +118,17 @@ public class ChatSentinel {
 		}
 	}
 
-	public String[][] getPlaceholders(Player player, ChatPlayer chatPlayer, ModerationModule moderationModule, String message) {
+	public String[][] getPlaceholders(Player player, ChatPlayer chatPlayer, ModerationModule moderationModule,
+			String message, String detected) {
 		String playerName = player.getUsername();
 		int warns = chatPlayer.getWarns(moderationModule);
 		int maxWarns = moderationModule.getMaxWarns();
 		float remainingTime = moduleManager.getCooldownModule().getRemainingTime(chatPlayer, message);
 
 		return new String[][] {
-				{ "%player%", "%message%", "%warns%", "%maxwarns%", "%cooldown%" },
-				{ playerName, message, String.valueOf(warns), String.valueOf(maxWarns), String.valueOf(remainingTime) }
+				{ "%player%", "%message%", "%warns%", "%maxwarns%", "%cooldown%", "%detected%", "%reason%" },
+				{ playerName, message, String.valueOf(warns), String.valueOf(maxWarns), String.valueOf(remainingTime),
+						detected != null ? detected : "", moderationModule.getReason() }
 		};
 	}
 
@@ -157,12 +159,14 @@ public class ChatSentinel {
 						moduleManager.getCapsModule(),
 						moduleManager.getCooldownModule(),
 						moduleManager.getFloodModule(),
+						moduleManager.getAutoBlacklistModule(),
 						moduleManager.getBlacklistModule()
 				}
 				: new ModerationModule[] {
 						moduleManager.getSyntaxModule(),
 						moduleManager.getCapsModule(),
 						moduleManager.getFloodModule(),
+						moduleManager.getAutoBlacklistModule(),
 						moduleManager.getBlacklistModule()
 				};
 
@@ -196,7 +200,7 @@ public class ChatSentinel {
 
 				// Get placeholders
 				String[][] placeholders = getPlaceholders(player, chatPlayer, moderationModule,
-						message);
+						message, result.getMatchedWord());
 
 				// Send warning
 				sendWarning(placeholders, moderationModule, player, lang);

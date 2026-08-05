@@ -8,11 +8,19 @@ public class PatternUtil {
         StringBuilder patternBuilder = new StringBuilder();
 
         for (String entry : patterns) {
+            if (entry == null || entry.isEmpty()) {
+                continue;
+            }
+
             if (patternBuilder.length() <= 0) {
                 patternBuilder.append("(" + entry);
             } else {
                 patternBuilder.append(")|(" + entry);
             }
+        }
+
+        if (patternBuilder.length() <= 0) {
+            return Pattern.compile("a^");
         }
 
         patternBuilder.append(")");
@@ -24,11 +32,19 @@ public class PatternUtil {
         StringBuilder patternBuilder = new StringBuilder();
 
         for (String entry : patterns) {
+            if (entry == null || entry.isEmpty()) {
+                continue;
+            }
+
             if (patternBuilder.length() <= 0) {
                 patternBuilder.append("(" + entry);
             } else {
                 patternBuilder.append(")|(" + entry);
             }
+        }
+
+        if (patternBuilder.length() <= 0) {
+            return Pattern.compile("a^");
         }
 
         patternBuilder.append(")");

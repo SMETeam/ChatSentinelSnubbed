@@ -9,6 +9,7 @@ public abstract class ModerationModule {
     private int maxWarns = 0;
     private String warnNotification = null;
 	private String[] commands = new String[0];
+    private String reason = "";
 
     public boolean isEnabled() {
         return enabled;
@@ -24,6 +25,14 @@ public abstract class ModerationModule {
 
     public void setMaxWarns(int maxWarns) {
         this.maxWarns = maxWarns;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason != null ? reason : "";
     }
 
     public String getWarnNotification(String[][] placeholders) {

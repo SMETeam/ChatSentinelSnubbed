@@ -1,0 +1,11 @@
+# Anything added here will immediately run the punishment commands below.
+enabled: true
+
+# You can use %reason% in the punishment commands.
+reason: "Automated ban! Offensive World Detected."
+
+# Placeholders: %player%, %message%, %detected%, %reason%, %warns%, %maxwarns%, %cooldown%
+punishments:
+  - "ban %player% %reason%"
+
+expressions: []
